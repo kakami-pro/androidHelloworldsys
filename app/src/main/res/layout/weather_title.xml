@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        android:layout_height="?attr/actionBarSize">
+
+        <TextView
+            android:id="@+id/title_city_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:textColor="@color/colorLight"
+            android:layout_marginRight="10dp"
+            android:textSize="20sp"
+            android:text="title_city" />
+
+        <TextView
+            android:id="@+id/title_pub_time_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/colorLight"
+            android:textSize="16sp"
+            android:text="title_update_time" />
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
