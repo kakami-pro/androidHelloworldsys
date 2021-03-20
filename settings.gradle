@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "lzl_task_10"
