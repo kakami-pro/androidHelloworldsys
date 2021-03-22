@@ -40,4 +40,5 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.8.1'
     implementation group: 'com.belerweb', name: 'pinyin4j', version: '2.5.1'
     implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
 }
