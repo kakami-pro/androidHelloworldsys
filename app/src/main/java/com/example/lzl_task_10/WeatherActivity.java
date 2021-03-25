@@ -1,9 +1,15 @@
 package com.example.lzl_task_10;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,17 +30,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WeatherActivity extends AppCompatActivity {
+    public static final int CITY_REQ_COQE=0;
     ImageView iv_cond;
     String weather_id="CN101210701";
     TextView tv_city,tv_update_time,tv_temp,tv_weather_info;
     LinearLayout forecastLayout;
     TextView tv_aqi,tv_pm25;
+    SwipeRefreshLayout swipeRefreshLayout;
+    AtomicInteger requestCount=new AtomicInteger(0);
+    private static final String KEY_WEATHER_ID="weather_id";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather);
+        loadWeatherId();
         forecastLayout=findViewById(R.id.forecast_layout);
         tv_city=findViewById(R.id.title_city_tv);
         tv_update_time=findViewById(R.id.title_pub_time_tv);
@@ -43,6 +55,14 @@ public class WeatherActivity extends AppCompatActivity {
         iv_cond=findViewById(R.id.now_cond_iv);
         tv_aqi=findViewById(R.id.aqi_text);
         tv_pm25=findViewById(R.id.pm25_text);
+        swipeRefreshLayout=findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateData();
+            }
+        });
         Button bt=findViewById(R.id.bt_update);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +70,42 @@ public class WeatherActivity extends AppCompatActivity {
                 updateData();
             }
         });
+
+        tv_city.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WeatherActivity.this, SelectCityActivity.class);
+                startActivityForResult(intent,CITY_REQ_COQE);
+            }
+        });
+        updateData();
+    }
+
+    private void loadWeatherId()
+    {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.getString(KEY_WEATHER_ID,"CN101210701");
+    }
+    private void saveWeatherId(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putString(KEY_WEATHER_ID,weather_id);
+        edit.apply();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==CITY_REQ_COQE&&resultCode== RESULT_OK){
+            weather_id=SelectCityActivity.getWeatherIdByIntent(data);
+            updateData();
+            saveWeatherId();
+        }
+    }
+
+    private void updateRefreshState(){
+        if (requestCount.incrementAndGet()==3){
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     private void updateWeatherAqi()
@@ -57,7 +113,7 @@ public class WeatherActivity extends AppCompatActivity {
         WeatherApiUtil.getAirQualityData(this, weather_id, new WeatherApiUtil.OnAirQualityFinished() {
             @Override
             public void onFinished(AirQualityData data) {
-                if (data!=null)
+                if (data!=null&&data.status.equalsIgnoreCase("ok"))
                 {
                     tv_aqi.setText(data.airNowCity.aqi);
                     tv_pm25.setText(data.airNowCity.pm25);
@@ -66,11 +122,14 @@ public class WeatherActivity extends AppCompatActivity {
                     tv_aqi.setText("--");
                     tv_pm25.setText("--");
                 }
+                updateRefreshState();
             }
         });
     }
     private void updateData()
     {
+        swipeRefreshLayout.setRefreshing(true);
+        requestCount.set(0);
         updateWeatherNow();
         updateWeatherForecast();
         updateWeatherAqi();
@@ -88,6 +147,7 @@ public class WeatherActivity extends AppCompatActivity {
                     tv_temp.setText(data.now.tmp);
                     tv_weather_info.setText(data.now.cond_txt);
                     updateWeatherIcon(data.now.cond_code,iv_cond);
+                    updateRefreshState();
                 }
             }
         });
@@ -120,7 +180,7 @@ public class WeatherActivity extends AppCompatActivity {
                         updateWeatherIcon(dailyForecast.cond_code_d,item_iv_day_con);
                         updateWeatherIcon(dailyForecast.cond_code_n,item_iv_night_con);
                         forecastLayout.addView(v);
-
+                        updateRefreshState();
                     }
 
                 }

@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ public class SelectCityActivity extends AppCompatActivity {
     int level_0_id;
     CityDatabase cityDatabase;
     Toolbar toolbar;
+    private static final String KEY_WEATHER_ID="weather_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +70,10 @@ public class SelectCityActivity extends AppCompatActivity {
                         break;
                     case 2:
                         String weather_id = item.getWeather_id();
-                        showToast(weather_id);
+                        Intent intent = getIntent();
+                        intent.putExtra(KEY_WEATHER_ID,weather_id);
+                        setResult(Activity.RESULT_OK,intent);
+                        finish();
                         break;
                 }
 
@@ -75,6 +81,10 @@ public class SelectCityActivity extends AppCompatActivity {
         });
 
     
+    }
+    public static String getWeatherIdByIntent(Intent intent){
+        String weather_id=intent.getStringExtra(KEY_WEATHER_ID);
+        return weather_id;
     }
 
     @Override
