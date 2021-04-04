@@ -1,20 +1,23 @@
 package com.example.lzl_task_10;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +27,10 @@ import com.example.lzl_task_10.db.GenerateDatabaseTask;
 import com.example.lzl_task_10.utility.HttpUtil;
 import com.example.lzl_task_10.utility.JsonUtil;
 import com.example.lzl_task_10.view.CityAdapter;
+import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectCityActivity extends AppCompatActivity {
@@ -36,7 +42,9 @@ public class SelectCityActivity extends AppCompatActivity {
     CityDatabase cityDatabase;
     Toolbar toolbar;
     private static final String KEY_WEATHER_ID="weather_id";
-
+    NavigationView navigationView;
+    SharedPreferences navigate;
+    List<City> menulist;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +53,35 @@ public class SelectCityActivity extends AppCompatActivity {
         cityDatabase.open();
         lv=findViewById(R.id.listview);
         getAndUpdateCityList(baseUrl,-1,0);
-               toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
+        menulist=new ArrayList<>();
         setSupportActionBar(toolbar);
         toolbar.setTitle("China");
+        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open, R.string.close);
+        actionBarDrawerToggle.syncState();
+        navigationView= (NavigationView) findViewById(R.id.navigationBar);
+        navigate= getSharedPreferences("Navigate", MODE_PRIVATE);
+        String city = navigate.getString("city", "");
+        menulist = JsonUtil.getCityListFromJson(city, -1, 2);
+        Menu menu1 = navigationView.getMenu();
+        menu1.clear();
+        for (City city1 : menulist) {
+            menu1.add(city1.getName());
+        }
+
+
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Intent intent = getIntent();
+                intent.putExtra(KEY_WEATHER_ID,item.getTitle().toString());
+                setResult(Activity.RESULT_OK,intent);
+                finish();
+                return false;
+            }
+        });
 
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -69,9 +103,9 @@ public class SelectCityActivity extends AppCompatActivity {
                         getAndUpdateCityList(url,cityid,level+1);
                         break;
                     case 2:
-                        String weather_id = item.getWeather_id();
+//                        String weather_id = item.getWeather_id();
                         Intent intent = getIntent();
-                        intent.putExtra(KEY_WEATHER_ID,weather_id);
+                        intent.putExtra(KEY_WEATHER_ID,item.getName());
                         setResult(Activity.RESULT_OK,intent);
                         finish();
                         break;
@@ -79,12 +113,67 @@ public class SelectCityActivity extends AppCompatActivity {
 
             }
         });
-
-    
+        registerForContextMenu(lv);
     }
     public static String getWeatherIdByIntent(Intent intent){
         String weather_id=intent.getStringExtra(KEY_WEATHER_ID);
         return weather_id;
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int position = menuInfo.position;
+//        String weather_id = adapter.getItem(position).getWeather_id();
+        City city = adapter.getItem(position);
+        String name = city.getName();
+        switch (item.getItemId()) {
+            case R.id.check_ctx:
+                if (city.getLevel()==2){
+                    Intent intent = getIntent();
+                    intent.putExtra(KEY_WEATHER_ID,name);
+                    setResult(Activity.RESULT_OK,intent);
+                    finish();
+                }
+                break;
+            case R.id.add_ctx:
+                if (city.getLevel()==2&&getCityfromMenu(city.getName())==null){
+                    menulist.add(city);
+                    updateNavigationMenu();
+                }
+                break;
+            case R.id.delete_ctx:
+                City cityfromMenu = getCityfromMenu(city.getName());
+                if (cityfromMenu !=null){
+                    menulist.remove(cityfromMenu);
+                    updateNavigationMenu();
+                }
+                break;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+    private void updateNavigationMenu(){
+        Menu menu = navigationView.getMenu();
+        menu.clear();
+        for (City city : menulist) {
+            menu.add(city.getName());
+        }
+    }
+    private City getCityfromMenu(String match)
+    {
+        for (City city : menulist) {
+            if (city.getName().equalsIgnoreCase(match)){
+                return city;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.select_ctx,menu);
     }
 
     @Override
@@ -204,6 +293,9 @@ public class SelectCityActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SharedPreferences.Editor edit = navigate.edit();
+        edit.putString("city",JsonUtil.getJsonfromCityList(menulist));
+        edit.commit();
         cityDatabase.close();
     }
 

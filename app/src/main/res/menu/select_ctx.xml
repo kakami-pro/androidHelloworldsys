@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/check_ctx"
+        android:title="check" />
+    <item
+        android:id="@+id/add_ctx"
+        android:title="add" />
+    <item
+        android:id="@+id/delete_ctx"
+        android:title="delete" />
+</menu>

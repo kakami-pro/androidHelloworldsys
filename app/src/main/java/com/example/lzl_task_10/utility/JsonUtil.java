@@ -33,4 +33,9 @@ public class JsonUtil {
         }
         return list;
     }
+    public static String getJsonfromCityList(List<City> list){
+        Gson gson=new Gson();
+        String s = gson.toJson(list);
+        return s;
+    }
 }

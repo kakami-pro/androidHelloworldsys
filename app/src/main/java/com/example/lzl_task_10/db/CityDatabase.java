@@ -85,7 +85,16 @@ public class CityDatabase {
             }
         });
     }
+    public City querycityByName(String match){
+        String sql = String.format("select * from %s where %s = ? and %s=?", CITY_TABLE, KEY_NAME, KEY_LEVEL);
+        Cursor cursor = db.rawQuery(sql, new String[]{match, "2"});
+        if (cursor.getCount()>0){
+            cursor.moveToPosition(0);
+            return getCityfromCursor(cursor);
+        }
+        else return null;
 
+    }
     public void fuzzyQueryCityListAsync(String match,OnQueryFinished listener)
     {
         asyncLoader(listener, new LoaderWork() {

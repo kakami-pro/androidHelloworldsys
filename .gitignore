@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/src/main/java/com/example/lzl_task_10/testactivity.java
+/app/src/main/res/layout/activity_testactivity.xml

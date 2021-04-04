@@ -7,11 +7,11 @@ public class City {
     private String enName="";
     private String initialName="";
     private String weather_id="";
-
     public City() {
     }
 
     public City(int id, String name, int parentId) {
+
         this.id = id;
         this.name = name;
         this.parentId = parentId;
