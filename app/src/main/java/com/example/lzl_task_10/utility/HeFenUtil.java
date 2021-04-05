@@ -3,11 +3,16 @@ package com.example.lzl_task_10.utility;
 import android.app.Activity;
 import android.content.Context;
 import android.text.method.QwertyKeyListener;
+import android.widget.ArrayAdapter;
 
 import com.example.lzl_task_10.data.AirQualityData;
 import com.example.lzl_task_10.data.WeatherForecast;
 import com.example.lzl_task_10.data.WeatherNow;
+import com.hp.hpl.sparta.Document;
+import com.qweather.sdk.bean.IndicesBean;
+import com.qweather.sdk.bean.WarningBean;
 import com.qweather.sdk.bean.air.AirNowBean;
+import com.qweather.sdk.bean.base.IndicesType;
 import com.qweather.sdk.bean.base.Lang;
 import com.qweather.sdk.bean.base.Range;
 import com.qweather.sdk.bean.geo.GeoBean;
@@ -16,7 +21,10 @@ import com.qweather.sdk.bean.weather.WeatherNowBean;
 import com.qweather.sdk.view.HeConfig;
 import com.qweather.sdk.view.QWeather;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.qweather.sdk.bean.base.IndicesType.COMF;
 
 public class HeFenUtil {
     static {
@@ -68,6 +76,42 @@ public class HeFenUtil {
                 String id = locationBean.get(0).getId();
 
                 QWeather.getAirNow(activity,id, null, listener);
+            }
+        });
+
+    }
+    public static void getWarningData(Activity activity,String cityname,QWeather.OnResultWarningListener listener)
+    {
+        QWeather.getGeoCityLookup(activity, cityname, Range.CN, 1, null, new QWeather.OnResultGeoListener() {
+            @Override
+            public void onError(Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(GeoBean geoBean) {
+                List<GeoBean.LocationBean> locationBean = geoBean.getLocationBean();
+                String id = locationBean.get(0).getId();
+                QWeather.getWarning(activity, id, null, listener);
+            }
+        });
+    }
+
+    public static void getLifequality(Activity activity,String cityname,IndicesType type,QWeather.OnResultIndicesListener listener)
+    {
+        QWeather.getGeoCityLookup(activity, cityname, Range.CN, 1, null, new QWeather.OnResultGeoListener() {
+            @Override
+            public void onError(Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(GeoBean geoBean) {
+                List<GeoBean.LocationBean> locationBean = geoBean.getLocationBean();
+                String id = locationBean.get(0).getId();
+                List<IndicesType> list=new ArrayList<>();
+                list.add(type);
+                QWeather.getIndices1D(activity, id, Lang.ZH_HANS, list,listener);
             }
         });
 

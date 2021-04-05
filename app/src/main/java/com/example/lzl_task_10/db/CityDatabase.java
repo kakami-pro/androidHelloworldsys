@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
 import com.example.lzl_task_10.data.City;
+import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class CityDatabase {
     public static final String KEY_INI_NAME="ini_name";
     public static final String KEY_LEVEL="level";
     public static final String KEY_LOOK_UP="key_look_up";
-    public static final String DB_NAME="citydb.db";
+    public static final String DB_NAME= "databases/citydb.db";
     public static final String CITY_TABLE="city";
     private int version=3;
     private Activity activity;
@@ -249,30 +249,54 @@ public class CityDatabase {
     }
 
 
-    class DatabaseHelper extends SQLiteOpenHelper{
+//    class DatabaseHelper extends SQLiteOpenHelper{
+//
+//        public DatabaseHelper() {
+//            super(activity, DB_NAME, null, version);
+//        }
+//
+//        @Override
+//        public void onCreate(SQLiteDatabase db) {
+//            String sql = String.format("create table if not exists %s " +
+//                            "(_id integer primary key autoincrement," +
+//                            "%s int,%s int,%s text,%s text,%s text,%s int,%s text,%s text)", CITY_TABLE, KEY_ID, KEY_PID
+//                    , KEY_NAME, KEY_EN_NAME, KEY_INI_NAME, KEY_LEVEL, KEY_LOOK_UP, KEY_WEATHER_ID);
+//            db.execSQL(sql);
+//        }
+//
+//        @Override
+//        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//            resetData(db);
+//        }
+//        public void resetData(SQLiteDatabase db)
+//        {
+//            String sql = String.format("drop table if exists %s", CITY_TABLE);
+//            db.execSQL(sql);
+//            onCreate(db);
+//        }
+//    }
+    class DatabaseHelper extends SQLiteAssetHelper{
+        private static final String DATABASE_NAME= "citydb.db";
+        private static final int DATABASE_VERSION=3;
 
-        public DatabaseHelper() {
-            super(activity, DB_NAME, null, version);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            String sql = String.format("create table if not exists %s " +
-                            "(_id integer primary key autoincrement," +
-                            "%s int,%s int,%s text,%s text,%s text,%s int,%s text,%s text)", CITY_TABLE, KEY_ID, KEY_PID
-                    , KEY_NAME, KEY_EN_NAME, KEY_INI_NAME, KEY_LEVEL, KEY_LOOK_UP, KEY_WEATHER_ID);
-            db.execSQL(sql);
+        public DatabaseHelper(){
+            super(activity,DATABASE_NAME,null,DATABASE_VERSION);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            super.onUpgrade(db, oldVersion, newVersion);
             resetData(db);
         }
         public void resetData(SQLiteDatabase db)
         {
             String sql = String.format("drop table if exists %s", CITY_TABLE);
             db.execSQL(sql);
-            onCreate(db);
+            sql = String.format("create table if not exists %s " +
+                                "(_id integer primary key autoincrement," +
+                                "%s int,%s int,%s text,%s text,%s text,%s int,%s text,%s text)", CITY_TABLE, KEY_ID, KEY_PID
+                        , KEY_NAME, KEY_EN_NAME, KEY_INI_NAME, KEY_LEVEL, KEY_LOOK_UP, KEY_WEATHER_ID);
+            db.execSQL(sql);
         }
     }
 }

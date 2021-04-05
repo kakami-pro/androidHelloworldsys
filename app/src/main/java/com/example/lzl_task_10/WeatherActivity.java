@@ -31,7 +31,10 @@ import com.example.lzl_task_10.utility.WeatherApiUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.qweather.sdk.bean.IndicesBean;
+import com.qweather.sdk.bean.WarningBean;
 import com.qweather.sdk.bean.air.AirNowBean;
+import com.qweather.sdk.bean.base.IndicesType;
 import com.qweather.sdk.bean.weather.WeatherDailyBean;
 import com.qweather.sdk.bean.weather.WeatherNowBean;
 import com.qweather.sdk.view.QWeather;
@@ -44,7 +47,7 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView iv_cond;
     String weather_id="CN101210701";
     String city_name="温州";
-    TextView tv_city,tv_update_time,tv_temp,tv_weather_info;
+    TextView tv_city,tv_update_time,tv_temp,tv_weather_info,warn_level,warn_title,COM_tv,TRA_tv;
     LinearLayout forecastLayout;
     TextView tv_aqi,tv_pm25;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -63,6 +66,8 @@ public class WeatherActivity extends AppCompatActivity {
         iv_cond=findViewById(R.id.now_cond_iv);
         tv_aqi=findViewById(R.id.aqi_text);
         tv_pm25=findViewById(R.id.pm25_text);
+        COM_tv=findViewById(R.id.COMF_tv);
+        TRA_tv=findViewById(R.id.TRA_tv);
         swipeRefreshLayout=findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -123,10 +128,33 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     private void updateRefreshState(){
-        if (requestCount.incrementAndGet()==3){
+        if (requestCount.incrementAndGet()==4){
             swipeRefreshLayout.setRefreshing(false);
         }
     }
+
+//    private void updateWarndata()
+//    {
+//        HeFenUtil.getWarningData(this, city_name, new QWeather.OnResultWarningListener() {
+//            @Override
+//            public void onError(Throwable throwable) {
+//                showToast(throwable.getMessage());
+//            }
+//
+//            @Override
+//            public void onSuccess(WarningBean warningBean) {
+//                List<WarningBean.WarningBeanBase> beanBaseList = warningBean.getBeanBaseList();
+//                if (beanBaseList.size()>0){
+//                    WarningBean.WarningBeanBase warningBeanBase = warningBean.getBeanBaseList().get(0);
+//                    warn_title.setText(warningBeanBase.getTitle());
+//                    warn_level.setText(warningBeanBase.getLevel());
+//                }
+//
+//            }
+//        });
+//        updateRefreshState();
+//    }
+
 
     private void updateWeatherAqi()
     {
@@ -175,8 +203,39 @@ public class WeatherActivity extends AppCompatActivity {
         updateWeatherNow();
         updateWeatherForecast();
         updateWeatherAqi();
+        updateLifeIndex();
     }
 
+    private void updateLifeIndex()
+    {
+        HeFenUtil.getLifequality(this, city_name, IndicesType.COMF ,new QWeather.OnResultIndicesListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                showToast(throwable.getMessage());
+            }
+
+            @Override
+            public void onSuccess(IndicesBean indicesBean) {
+                IndicesBean.DailyBean dailyBean = indicesBean.getDailyList().get(0);
+                String type = dailyBean.getType();
+                COM_tv.setText(type);
+            }
+        });
+        HeFenUtil.getLifequality(this, city_name,IndicesType.TRAV, new QWeather.OnResultIndicesListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                showToast(throwable.getMessage());
+            }
+
+            @Override
+            public void onSuccess(IndicesBean indicesBean) {
+                IndicesBean.DailyBean dailyBean = indicesBean.getDailyList().get(0);
+                String type = dailyBean.getType();
+                TRA_tv.setText(type);
+            }
+        });
+        updateRefreshState();
+    }
     private void updateWeatherNow()
     {
 //        WeatherApiUtil.getWeatherNow(this, weather_id, new WeatherApiUtil.OnWeatherNowFinished() {
@@ -215,8 +274,10 @@ public class WeatherActivity extends AppCompatActivity {
     }
     private void updateWeatherIcon(String cond_code,ImageView iv_cond)
     {
-        String url = String.format("https://cdn.heweather.com/cond_icon/%s.png", cond_code);
-        Glide.with(this).load(Uri.parse(url)).into(iv_cond);
+//        String url = String.format("https://cdn.heweather.com/cond_icon/%s.png", cond_code);
+//        Glide.with(this).load(Uri.parse(url)).into(iv_cond);
+        int drawable = getResources().getIdentifier("hefen" + cond_code , "drawable", getPackageName());
+        iv_cond.setImageResource(drawable);
     }
     private  void updateWeatherForecast()
     {
