@@ -27,11 +27,25 @@
                     android:layout_height="wrap_content"
                     android:text="18211160214 赖泽龙" />
 
-                <Button
-                    android:id="@+id/bt_update"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="update" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/bt_update"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="update" />
+
+                    <Button
+                        android:id="@+id/bt_map"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Map" />
+                </LinearLayout>
 
                 <include
                     layout="@layout/weather_title"

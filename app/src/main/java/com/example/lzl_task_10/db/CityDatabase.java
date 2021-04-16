@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 
 import com.example.lzl_task_10.data.City;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
@@ -32,6 +33,7 @@ public class CityDatabase {
         this.activity=activity;
 
     }
+
 
     public City queryCityById(int id,int level)
     {
@@ -221,6 +223,12 @@ public class CityDatabase {
 
         }
         return list;
+    }
+
+    public List<City> getCityofLevel2(int zoom_level){
+        String format = String.format("select * from %s where %s=%d", CITY_TABLE,KEY_LEVEL, zoom_level);
+        List<City> cityListBySql = getCityListBySql(format, null);
+        return cityListBySql;
     }
 
     public List<City> getCityListBySql(String sql,String[] args)

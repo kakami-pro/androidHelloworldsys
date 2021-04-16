@@ -28,14 +28,19 @@ import static com.qweather.sdk.bean.base.IndicesType.COMF;
 
 public class HeFenUtil {
     static {
-        HeConfig.init("HE2104032015181982", "6a0600142ba34ebead94874e679f5f03");
+        HeConfig.init("HE2104151849461823", "68e21d870d6c4c158a6e91ad36420ba4");
         HeConfig.switchToDevService();
+    }
+
+    public static void setGEO(Activity activity,String cityname,QWeather.OnResultGeoListener listener){
+        QWeather.getGeoCityLookup(activity, cityname, Range.CN, 1, null, listener);
     }
 
     public static void getWeatherNow(Activity activity, String cityname,QWeather.OnResultWeatherNowListener listener){
         QWeather.getGeoCityLookup(activity, cityname, Range.CN, 1, null, new QWeather.OnResultGeoListener() {
             @Override
             public void onError(Throwable throwable) {
+
 
             }
 
@@ -63,6 +68,7 @@ public class HeFenUtil {
             }
         });
     }
+
     public static void getAirQualityData(final Activity activity, String cityname,  QWeather.OnResultAirNowListener listener){
         QWeather.getGeoCityLookup(activity, cityname, Range.CN, 1, null, new QWeather.OnResultGeoListener() {
             @Override

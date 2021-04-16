@@ -47,7 +47,7 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView iv_cond;
     String weather_id="CN101210701";
     String city_name="温州";
-    TextView tv_city,tv_update_time,tv_temp,tv_weather_info,warn_level,warn_title,COM_tv,TRA_tv;
+    TextView tv_city,tv_update_time,tv_temp,tv_weather_info,COM_tv,TRA_tv;
     LinearLayout forecastLayout;
     TextView tv_aqi,tv_pm25;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -70,13 +70,37 @@ public class WeatherActivity extends AppCompatActivity {
         TRA_tv=findViewById(R.id.TRA_tv);
         swipeRefreshLayout=findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        Button bt=findViewById(R.id.bt_update);
+        Button bt_map=findViewById(R.id.bt_map);
+
+        HeFenUtil.getWeatherNow(this, "温州", new QWeather.OnResultWeatherNowListener() {
+            @Override
+            public void onError(Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(WeatherNowBean weatherNowBean) {
+                String cloud = weatherNowBean.getNow().getCloud();
+                System.out.println(cloud+"+++++++++++++++++++++++++++");
+            }
+        });
+
+
+        bt_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WeatherActivity.this, MapActivity.class);
+                startActivity(intent);
+            }
+        });
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 updateData();
             }
         });
-        Button bt=findViewById(R.id.bt_update);
+
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -256,6 +280,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onError(Throwable throwable) {
                 showToast(throwable.getMessage());
+                System.out.println(throwable.getMessage());
             }
 
             @Override
